@@ -67,16 +67,23 @@ extension ViewController {
             guard let lastCross = diagonal.last else { return }
             for i in 0..<diagonal.count {
                 let cross = diagonal[i]
- 
-                UIView.animateKeyframes(withDuration: 2, delay: 0, options: [.calculationModeCubicPaced], animations: {
-                    UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
-                        cross.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(-90))
-                    }
-                    
-                    UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.25) {
-                        cross.center = CGPoint(x: CGFloat(i)*self.size,
-                                               y: lastCross.frame.minY)
-                    }
+                
+                UIView.animateKeyframes(withDuration: 2,
+                                        delay: 0,
+                                        options: [.calculationModeCubicPaced],
+                                        animations:
+                    {
+//                        UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
+//                            cross.layer.transform = CATransform3DMakeRotation(self.degreesToRadians(-180), 10, 10, 0)
+//                        }
+                        UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
+                            cross.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(-90))
+                        }
+                        
+                        UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.25) {
+                            cross.center = CGPoint(x: CGFloat(i)*self.size,
+                                                   y: lastCross.frame.minY)
+                        }
                 })
             }
         }
@@ -93,12 +100,10 @@ extension ViewController {
                                            y: CGFloat(cols)*step + 0*size)
         
         let additionalRows = lastCrossInFirstLine.y / (size*2/3)
-        print(">>> additionalRows: ", additionalRows.rounded())
         
         let lastCrossInLastLine = CGPoint(x: CGFloat(cols)*size - CGFloat(rows)*step,
                                           y: CGFloat(cols)*step + CGFloat(rows)*size)
         let additionalCols = (lastCrossInLastLine.x + size) / (size*2/3)
-        print(">>> additionalCols: ", additionalCols.rounded())
         
         return (Int(additionalRows.rounded()), Int(additionalCols.rounded()))
     }
@@ -106,7 +111,6 @@ extension ViewController {
 
 
 extension UIView {
-    // TODO: - KISS
     func createCross() {
         let step = self.bounds.width / 3
         
@@ -115,17 +119,17 @@ extension UIView {
         
         path.move(to: start)
         
-        path.addLine(to: CGPoint(x: step * 2, y: 0))
-        path.addLine(to: CGPoint(x: step * 2, y: step))
-        path.addLine(to: CGPoint(x: step * 3, y: step))
+        path.addLine(to: CGPoint(x: step * 2, y: step * 0))
+        path.addLine(to: CGPoint(x: step * 2, y: step * 1))
+        path.addLine(to: CGPoint(x: step * 3, y: step * 1))
         path.addLine(to: CGPoint(x: step * 3, y: step * 2))
         path.addLine(to: CGPoint(x: step * 2, y: step * 2))
         path.addLine(to: CGPoint(x: step * 2, y: step * 3))
-        path.addLine(to: CGPoint(x: step,     y: step * 3))
-        path.addLine(to: CGPoint(x: step,     y: step * 2))
-        path.addLine(to: CGPoint(x: 0,        y: step * 2))
-        path.addLine(to: CGPoint(x: 0,        y: step))
-        path.addLine(to: CGPoint(x: step,     y: step))
+        path.addLine(to: CGPoint(x: step * 1, y: step * 3))
+        path.addLine(to: CGPoint(x: step * 1, y: step * 2))
+        path.addLine(to: CGPoint(x: step * 0, y: step * 2))
+        path.addLine(to: CGPoint(x: step * 0, y: step * 1))
+        path.addLine(to: CGPoint(x: step * 1, y: step * 1))
 
         path.close()
         
