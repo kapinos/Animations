@@ -10,7 +10,6 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var animateButton: UIButton!
     
     // MARK: - Properties
     var crossesDiagonales = [[UIView]]()
@@ -32,13 +31,13 @@ class ViewController: UIViewController {
         cols = Int(self.view.bounds.width/size)
         rows = Int(self.view.bounds.height/size)
         
+        _ = self.view.subviews.map{ $0.removeFromSuperview() }
+        
         createDiagonals()
         
-        animateByDiagonal()
-    }
-    
-    @IBAction func animateButtonPressed(_ sender: UIButton) {
-        animate()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute:  {
+            self.animateByDiagonal()
+        })
     }
 }
 
@@ -46,12 +45,11 @@ extension ViewController {
     func createDiagonals() {
         let step = self.size / 3
         
-        let partial = Int(self.size*2/3)
-        
-        // TODO: - calculate shift right/left/up/down out of the screen bounds instead of -rows..<rows*2
-        for row in -rows...rows {
+        let shift = countAdditional()
+
+        for row in -shift.rows...rows {
             var diagonal = [UIView]()
-            for col in -1...cols*2 {
+            for col in 0...cols + shift.cols {
                 let point = CGPoint(x: CGFloat(col)*size - CGFloat(row)*step,
                                     y: CGFloat(col)*step + CGFloat(row)*size)
                 let cross = UIView(frame: CGRect(origin: point, size: CGSize(width: size, height: size)))
@@ -65,34 +63,44 @@ extension ViewController {
     
     func animateByDiagonal() {
         for diagonal in crossesDiagonales {
-            for cross in diagonal {
-                print(">>> currentPosition: ", cross.frame.minX, ", ", cross.frame.minY)
-            }
-        }
-    }
-
-    func animate() {
-        let shift: CGFloat = 10
-        
-        UIView.animateKeyframes(withDuration: 1, delay: 0, options: .calculationModeCubicPaced, animations: {
-            let angle: CGFloat = self.isAnimation ? -90 : 90
             
-            UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
-               // _ = self.crosses.map{ $0.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(angle)) }
+            guard let lastCross = diagonal.last else { return }
+            for i in 0..<diagonal.count {
+                let cross = diagonal[i]
+ 
+                UIView.animateKeyframes(withDuration: 2, delay: 0, options: [.calculationModeCubicPaced], animations: {
+                    UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
+                        cross.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(-90))
+                    }
+                    
+                    UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.25) {
+                        cross.center = CGPoint(x: CGFloat(i)*self.size,
+                                               y: lastCross.frame.minY)
+                    }
+                })
             }
-            
-            let shiftDown = self.isAnimation ? shift : -shift
-            UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.25) {
-                //_ = self.crosses.map{ $0.center = CGPoint(x: $0.center.x + shiftDown, y: $0.center.y + shiftDown)}
-            }
-        }) { (_) in
-            self.animateButton.titleLabel?.text = self.isAnimation ? "Back" : "Animate"
-            self.isAnimation = !self.isAnimation
         }
     }
     
     func degreesToRadians(_ degrees: CGFloat) -> CGFloat {
         return degrees * CGFloat(Double.pi) / 180.0
+    }
+    
+    func countAdditional() -> (rows: Int, cols: Int) {
+        let step = self.size / 3
+        
+        let lastCrossInFirstLine = CGPoint(x: CGFloat(cols)*size - 0*step,
+                                           y: CGFloat(cols)*step + 0*size)
+        
+        let additionalRows = lastCrossInFirstLine.y / (size*2/3)
+        print(">>> additionalRows: ", additionalRows.rounded())
+        
+        let lastCrossInLastLine = CGPoint(x: CGFloat(cols)*size - CGFloat(rows)*step,
+                                          y: CGFloat(cols)*step + CGFloat(rows)*size)
+        let additionalCols = (lastCrossInLastLine.x + size) / (size*2/3)
+        print(">>> additionalCols: ", additionalCols.rounded())
+        
+        return (Int(additionalRows.rounded()), Int(additionalCols.rounded()))
     }
 }
 
