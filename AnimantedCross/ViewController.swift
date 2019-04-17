@@ -2,19 +2,26 @@
 //  ViewController.swift
 //  AnimantedCross
 //
-//  Created by Developer on 4/9/19.
-//  Copyright © 2019 Developer. All rights reserved.
+//  Created by Anastasia Kapinos on 4/9/19.
+//  Copyright © 2019 Anastasia Kapinos. All rights reserved.
 //
 
 import UIKit
 
-class ViewController: UIViewController {
+// FIXME: - need to
+// - create class for CrossView
+// - customize animation blocks - set in different functions
 
+class ViewController: UIViewController {
     
     // MARK: - Properties
-    var crossesDiagonales = [[UIView]]()
+    var crossesInDiagonales = [[UIView]]()
+    var cubesInLines = [[UIView]]()
+    
     let size: CGFloat = 30
-    var isAnimation = true
+    
+    let crossesColor = UIColor.yellow
+    let bgColor = UIColor.black
     
     var cols = 0
     var rows = 0
@@ -22,7 +29,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .black
+        self.view.backgroundColor = bgColor
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -31,18 +38,20 @@ class ViewController: UIViewController {
         cols = Int(self.view.bounds.width/size)
         rows = Int(self.view.bounds.height/size)
         
-        _ = self.view.subviews.map{ $0.removeFromSuperview() }
+        restoreView()
         
-        createDiagonals()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute:  {
-            self.animateByDiagonal()
+        createDiagonalsWithCrosses()
+        self.animateByDiagonalsToRows(completion: {
+            self.invertCrossesAndCubes()
+            self.animateCubesToRombs()
         })
     }
 }
 
-extension ViewController {
-    func createDiagonals() {
+// MARK: - Creation Views for Animations
+private extension ViewController {
+    func createDiagonalsWithCrosses() {
         let step = self.size / 3
         
         let shift = countAdditional()
@@ -53,42 +62,100 @@ extension ViewController {
                 let point = CGPoint(x: CGFloat(col)*size - CGFloat(row)*step,
                                     y: CGFloat(col)*step + CGFloat(row)*size)
                 let cross = UIView(frame: CGRect(origin: point, size: CGSize(width: size, height: size)))
-                cross.createCross()
+                cross.addCrossPathInViewsLayer(with: crossesColor)
                 self.view.addSubview(cross)
                 diagonal.append(cross)
             }
-            crossesDiagonales.append(diagonal)
+            crossesInDiagonales.append(diagonal)
         }
     }
     
-    func animateByDiagonal() {
-        for diagonal in crossesDiagonales {
+    func createRowsWithCubes() {
+        let step = self.size / 3
+        
+        for diagonal in crossesInDiagonales {
+            var line = [UIView]()
+            for i in 0..<diagonal.count {
+                let point = CGPoint(x: diagonal[i].frame.minX + step*2, y: diagonal[i].frame.minY + step*2)
+                let cube = UIView(frame: CGRect(origin: point, size: CGSize(width: step*2, height: step*2)))
+                cube.backgroundColor = self.bgColor
+                self.view.addSubview(cube)
+                line.append(cube)
+            }
+            cubesInLines.append(line)
+        }
+    }
+
+    // (1) hide diagonalster
+    // (2) change BG
+    // (3) display cubes
+    func invertCrossesAndCubes() {
+        self.view.backgroundColor = self.crossesColor
+        self.createRowsWithCubes()
+        self.crossesInDiagonales.flatMap{ $0.map{ $0.isHidden = true } }
+    }
+    
+    func restoreView() {
+        _ = self.view.subviews.map{ $0.removeFromSuperview() }
+        self.view.backgroundColor = self.bgColor
+    }
+}
+
+// MARK: - Animations
+private extension ViewController {
+    // MARK: - First Step
+    func animateByDiagonalsToRows(completion: @escaping ()->()) {
+        for diagonal in crossesInDiagonales {
             
             guard let lastCross = diagonal.last else { return }
             for i in 0..<diagonal.count {
                 let cross = diagonal[i]
                 
-                UIView.animateKeyframes(withDuration: 2,
-                                        delay: 0,
+                UIView.animateKeyframes(withDuration: 1,
+                                        delay: 1,
                                         options: [.calculationModeCubicPaced],
                                         animations:
                     {
-//                        UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
-//                            cross.layer.transform = CATransform3DMakeRotation(self.degreesToRadians(-180), 10, 10, 0)
-//                        }
-                        UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
-                            cross.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(-90))
-                        }
-                        
-                        UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.25) {
-                            cross.center = CGPoint(x: CGFloat(i)*self.size,
-                                                   y: lastCross.frame.minY)
-                        }
-                })
+                    // UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
+                    //  cross.layer.transform = CATransform3DMakeRotation(self.degreesToRadians(-180), 10, 10, 0)
+                    // }
+                    
+                    UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.5) {
+                        cross.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(-90))
+                    }
+                    
+                    UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.5) {
+                        cross.center = CGPoint(x: CGFloat(i)*self.size, y: lastCross.frame.minY)
+                    }
+                }) { (_) in
+                    if i == diagonal.count-1 {
+                        completion()
+                    }
+                }
             }
         }
     }
     
+    // MARK: - Second Step
+    func animateCubesToRombs() {
+        for line in cubesInLines {
+            for i in 0..<line.count {
+                let cube = line[i]
+                
+                UIView.animateKeyframes(withDuration: 1, delay: 0, options: [.calculationModeCubicPaced], animations: {
+                    cube.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(135))
+                }) { (_) in
+                    
+                }
+            }
+        }
+    }
+}
+
+
+
+// MARK: - Private Helpers
+private extension ViewController {
     func degreesToRadians(_ degrees: CGFloat) -> CGFloat {
         return degrees * CGFloat(Double.pi) / 180.0
     }
@@ -109,9 +176,8 @@ extension ViewController {
     }
 }
 
-
 extension UIView {
-    func createCross() {
+    func addCrossPathInViewsLayer(with color: UIColor) {
         let step = self.bounds.width / 3
         
         let path = UIBezierPath()
@@ -135,7 +201,7 @@ extension UIView {
         
         let shapeLayer = CAShapeLayer()
         shapeLayer.path = path.cgPath
-        shapeLayer.fillColor = UIColor.yellow.cgColor
+        shapeLayer.fillColor = color.cgColor
         
         self.layer.addSublayer(shapeLayer)
     }

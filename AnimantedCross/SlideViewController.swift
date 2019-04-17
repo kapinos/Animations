@@ -2,11 +2,18 @@
 //  SlideViewController.swift
 //  AnimantedCross
 //
-//  Created by Developer on 4/12/19.
-//  Copyright © 2019 Developer. All rights reserved.
+//  Created by Anastasia Kapinos  on 4/12/19.
+//  Copyright © 2019 Anastasia Kapinos. All rights reserved.
 //
 
 import UIKit
+
+// FIXME: - rewrite normally:
+// (1) need to count values for slideView and visible part
+// (2) need to count shift for visible views under slideView
+// (3) reduce warnings in storyboard for slideView
+// (4)
+
 
 private enum State {
     case closed
@@ -156,8 +163,8 @@ private extension SlideViewController {
         
         // - other views
         titleView.layer.cornerRadius = titleView.frame.height / 2
-        carView.layer.cornerRadius   = 45
-        walkView.layer.cornerRadius  = 45
+//        carView.layer.cornerRadius   = 45
+//        walkView.layer.cornerRadius  = 45
         
         carView.layer.masksToBounds = true
         walkView.layer.masksToBounds = true

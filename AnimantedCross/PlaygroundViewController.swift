@@ -2,8 +2,8 @@
 //  PlaygroundViewController.swift
 //  AnimantedCross
 //
-//  Created by Developer on 4/11/19.
-//  Copyright © 2019 Developer. All rights reserved.
+//  Created by Anastasia Kapinos  on 4/11/19.
+//  Copyright © 2019 Anastasia Kapinos. All rights reserved.
 //
 
 import UIKit
