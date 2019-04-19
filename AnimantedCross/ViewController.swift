@@ -15,8 +15,11 @@ import UIKit
 class ViewController: UIViewController {
     
     // MARK: - Properties
+    
+    // TODO: - need to create separated views for geomerty elements
     var crossesInDiagonales = [[UIView]]()
     var cubesInLines = [[UIView]]()
+    var rhombusesInLines = [[UIView]]()
     
     let size: CGFloat = 30
     
@@ -40,11 +43,12 @@ class ViewController: UIViewController {
         
         restoreView()
         
-        
         createDiagonalsWithCrosses()
         self.animateByDiagonalsToRows(completion: {
-            self.invertCrossesAndCubes()
-            self.animateCubesToRombs()
+            self.invertCrossesToCubes()
+            self.animateCubesToRombs(completion: {
+                self.invertCubesToRhombuses()
+            })
         })
     }
 }
@@ -85,14 +89,32 @@ private extension ViewController {
             cubesInLines.append(line)
         }
     }
+    
+    func createRowsWithRhombus() {
+        for line in cubesInLines {
+            var rLine = [UIView]()
+            for i in 0..<line.count {
+                let shift = CGFloat(powf(Float(self.size/3), 0.5))
+                let point = CGPoint(x: line[i].frame.minX + shift, y: line[i].frame.minY)
+                let rhombus = UIView(frame: CGRect(origin: point, size: CGSize(width: self.size, height: self.size)))
+                rhombus.addRhombusPathInViewsLayer(with: bgColor)
+                self.view.addSubview(rhombus)
+                rLine.append(rhombus)
+            }
+            rhombusesInLines.append(rLine)
+        }
+    }
 
-    // (1) hide diagonalster
-    // (2) change BG
-    // (3) display cubes
-    func invertCrossesAndCubes() {
+    func invertCrossesToCubes() {
         self.view.backgroundColor = self.crossesColor
         self.createRowsWithCubes()
-        self.crossesInDiagonales.flatMap{ $0.map{ $0.isHidden = true } }
+        _ = self.crossesInDiagonales.flatMap{ $0.map{ $0.isHidden = true } }
+    }
+    
+    func invertCubesToRhombuses() {
+        self.view.backgroundColor = self.crossesColor
+        self.createRowsWithRhombus()
+        _ = self.cubesInLines.flatMap{ $0.map{ $0.removeFromSuperview() } }
     }
     
     func restoreView() {
@@ -101,57 +123,40 @@ private extension ViewController {
     }
 }
 
+
 // MARK: - Animations
 private extension ViewController {
     // MARK: - First Step
     func animateByDiagonalsToRows(completion: @escaping ()->()) {
-        for diagonal in crossesInDiagonales {
-            
-            guard let lastCross = diagonal.last else { return }
-            for i in 0..<diagonal.count {
-                let cross = diagonal[i]
+        
+        UIView.animateKeyframes(withDuration: 1, delay: 1, options: [.calculationModeCubicPaced], animations: {
+            for diagonal in self.crossesInDiagonales {
                 
-                UIView.animateKeyframes(withDuration: 1,
-                                        delay: 1,
-                                        options: [.calculationModeCubicPaced],
-                                        animations:
-                    {
-                    // UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25) {
-                    //  cross.layer.transform = CATransform3DMakeRotation(self.degreesToRadians(-180), 10, 10, 0)
-                    // }
+                guard let lastCross = diagonal.last else { return }
+                for i in 0..<diagonal.count {
+                    let cross = diagonal[i]
                     
-                    UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.5) {
-                        cross.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(-90))
-                    }
+                    UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25)
+                    { cross.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(-90)) }
                     
-                    UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.5) {
-                        cross.center = CGPoint(x: CGFloat(i)*self.size, y: lastCross.frame.minY)
-                    }
-                }) { (_) in
-                    if i == diagonal.count-1 {
-                        completion()
-                    }
+                    UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.5)
+                    { cross.center = CGPoint(x: CGFloat(i)*self.size, y: lastCross.frame.minY) }
                 }
             }
-        }
+        }) { (_) in completion() }
     }
     
     // MARK: - Second Step
-    func animateCubesToRombs() {
-        for line in cubesInLines {
-            for i in 0..<line.count {
-                let cube = line[i]
-                
-                UIView.animateKeyframes(withDuration: 1, delay: 0, options: [.calculationModeCubicPaced], animations: {
+    func animateCubesToRombs(completion: @escaping ()->()) {
+        UIView.animateKeyframes(withDuration: 1, delay: 0, options: [.calculationModeCubicPaced], animations: {
+            for line in self.cubesInLines {
+                for cube in line {
                     cube.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(135))
-                }) { (_) in
-                    
                 }
             }
-        }
+        }) { (_) in completion() }
     }
 }
-
 
 
 // MARK: - Private Helpers
@@ -176,6 +181,8 @@ private extension ViewController {
     }
 }
 
+
+// MARK: - will be moved to separated view with crosses
 extension UIView {
     func addCrossPathInViewsLayer(with color: UIColor) {
         let step = self.bounds.width / 3
@@ -204,5 +211,36 @@ extension UIView {
         shapeLayer.fillColor = color.cgColor
         
         self.layer.addSublayer(shapeLayer)
+    }
+    
+    func addRhombusPathInViewsLayer(with color: UIColor) {
+        let step = self.bounds.width / 2
+        
+        let path = UIBezierPath()
+        let start = CGPoint(x: step, y: 0)
+        
+        path.move(to: start)
+        path.addLine(to: CGPoint(x: step * 2, y: step * 1))
+        path.addLine(to: CGPoint(x: step * 1, y: step * 2))
+        path.addLine(to: CGPoint(x: step * 0, y: step * 1))
+        path.close()
+        
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.path = path.cgPath
+        shapeLayer.fillColor = color.cgColor
+        
+        self.layer.addSublayer(shapeLayer)
+    }
+}
+
+
+extension ViewController {
+    func printStartTime(_ functionName: String) {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "mm:ss"
+        
+        let dateString = formatter.string(from: Date())
+        print(">>> func: \(functionName): ", dateString)
     }
 }
