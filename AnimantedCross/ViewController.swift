@@ -44,10 +44,12 @@ class ViewController: UIViewController {
         restoreView()
         
         createDiagonalsWithCrosses()
+        
         self.animateByDiagonalsToRows(completion: {
             self.invertCrossesToCubes()
-            self.animateCubesToRombs(completion: {
+            self.animateCubesToRhombuses(completion: {
                 self.invertCubesToRhombuses()
+                self.animateRhombusesToLines { }
             })
         })
     }
@@ -94,10 +96,19 @@ private extension ViewController {
         for line in cubesInLines {
             var rLine = [UIView]()
             for i in 0..<line.count {
-                let shift = CGFloat(powf(Float(self.size/3), 0.5))
-                let point = CGPoint(x: line[i].frame.minX + shift, y: line[i].frame.minY)
-                let rhombus = UIView(frame: CGRect(origin: point, size: CGSize(width: self.size, height: self.size)))
-                rhombus.addRhombusPathInViewsLayer(with: bgColor)
+                let viewSize = line[i].frame.size
+                // TODO: - extend in separated method
+                if i == 0 {
+                    let point = CGPoint(x: line[i].frame.midX - viewSize.width, y: line[i].frame.midY)
+                    let rhombus = UIView(frame: CGRect(origin: point, size: viewSize))
+                    rhombus.addRhombusPathInViewsLayer(with: self.crossesColor, bg: self.bgColor)
+                    self.view.addSubview(rhombus)
+                    rLine.append(rhombus)
+                }
+
+                let point = CGPoint(x: line[i].frame.midX, y: line[i].frame.midY)
+                let rhombus = UIView(frame: CGRect(origin: point, size: viewSize))
+                rhombus.addRhombusPathInViewsLayer(with: self.crossesColor, bg: self.bgColor)
                 self.view.addSubview(rhombus)
                 rLine.append(rhombus)
             }
@@ -112,7 +123,7 @@ private extension ViewController {
     }
     
     func invertCubesToRhombuses() {
-        self.view.backgroundColor = self.crossesColor
+        self.view.backgroundColor = self.bgColor
         self.createRowsWithRhombus()
         _ = self.cubesInLines.flatMap{ $0.map{ $0.removeFromSuperview() } }
     }
@@ -147,11 +158,25 @@ private extension ViewController {
     }
     
     // MARK: - Second Step
-    func animateCubesToRombs(completion: @escaping ()->()) {
+    func animateCubesToRhombuses(completion: @escaping ()->()) {
+        
         UIView.animateKeyframes(withDuration: 1, delay: 0, options: [.calculationModeCubicPaced], animations: {
             for line in self.cubesInLines {
                 for cube in line {
                     cube.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(135))
+                    cube.layer.shouldRasterize = true
+                }
+            }
+        }) { (_) in completion() }
+    }
+    
+    
+    // MARK: - Third Step
+    func animateRhombusesToLines(completion: @escaping ()->()) {
+        UIView.animateKeyframes(withDuration: 1, delay: 0, options: [.calculationModeCubicPaced], animations: {
+            for line in self.rhombusesInLines {
+                for rhoumbus in line {
+                    rhoumbus.transform = CGAffineTransform(rotationAngle: self.degreesToRadians(-135))
                 }
             }
         }) { (_) in completion() }
@@ -213,13 +238,15 @@ extension UIView {
         self.layer.addSublayer(shapeLayer)
     }
     
-    func addRhombusPathInViewsLayer(with color: UIColor) {
+    func addRhombusPathInViewsLayer(with color: UIColor, bg: UIColor) {
         let step = self.bounds.width / 2
         
         let path = UIBezierPath()
-        let start = CGPoint(x: step, y: 0)
+        let startPoint = CGPoint(x: step, y: 0)
         
-        path.move(to: start)
+        path.move(to: startPoint)
+//        let secPoint = CGPoint(x: step * 2, y: step * 1)
+//        print(">>> dist: ", CGPointDistance(from: start, to: secPoint)) // 20
         path.addLine(to: CGPoint(x: step * 2, y: step * 1))
         path.addLine(to: CGPoint(x: step * 1, y: step * 2))
         path.addLine(to: CGPoint(x: step * 0, y: step * 1))
@@ -228,12 +255,22 @@ extension UIView {
         let shapeLayer = CAShapeLayer()
         shapeLayer.path = path.cgPath
         shapeLayer.fillColor = color.cgColor
+        shapeLayer.backgroundColor = bg.cgColor
         
         self.layer.addSublayer(shapeLayer)
+    }
+    
+    func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
+        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
+    }
+    
+    func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
+        return sqrt(CGPointDistanceSquared(from: from, to: to))
     }
 }
 
 
+// MARK: - Helpers
 extension ViewController {
     func printStartTime(_ functionName: String) {
         let formatter = DateFormatter()
