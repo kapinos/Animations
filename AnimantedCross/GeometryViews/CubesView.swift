@@ -31,13 +31,14 @@ extension CubesView: GeometryShapesProtocol {
     func createSubviews(from views: [[UIView]]?, with color: UIColor) {
         guard let views = views else { return }
         
-        let step = self.size / 3
+        let step = self.size * 2 / 3
+        let sizePrecision = self.size / sqrt(2)
         
         for diagonal in views {
             var line = [UIView]()
             for i in 0..<diagonal.count {
-                let point = CGPoint(x: diagonal[i].frame.minX + step * 2, y: diagonal[i].frame.minY + step * 2)
-                let cube = UIView(frame: CGRect(origin: point, size: CGSize(width: step * 2, height: step * 2)))
+                let point = CGPoint(x: diagonal[i].frame.minX + step, y: diagonal[i].frame.minY + step)
+                let cube = UIView(frame: CGRect(origin: point, size: CGSize(width: sizePrecision, height: sizePrecision)))
                 cube.backgroundColor = color
                 self.addSubview(cube)
                 line.append(cube)

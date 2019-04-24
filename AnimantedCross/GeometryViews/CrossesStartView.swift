@@ -97,22 +97,24 @@ extension UIView {
     func addCrossPathInViewsLayer(with color: UIColor) {
         let step = self.bounds.width / 3
 
+        let k: CGFloat = step - (self.bounds.width / sqrt(2)) / 2
+
         let path = UIBezierPath()
-        let start = CGPoint(x: step, y: 0)
+        let start = CGPoint(x: step - k, y: 0)
 
         path.move(to: start)
 
-        path.addLine(to: CGPoint(x: step * 2, y: step * 0))
-        path.addLine(to: CGPoint(x: step * 2, y: step * 1))
-        path.addLine(to: CGPoint(x: step * 3, y: step * 1))
-        path.addLine(to: CGPoint(x: step * 3, y: step * 2))
-        path.addLine(to: CGPoint(x: step * 2, y: step * 2))
-        path.addLine(to: CGPoint(x: step * 2, y: step * 3))
-        path.addLine(to: CGPoint(x: step * 1, y: step * 3))
-        path.addLine(to: CGPoint(x: step * 1, y: step * 2))
-        path.addLine(to: CGPoint(x: step * 0, y: step * 2))
-        path.addLine(to: CGPoint(x: step * 0, y: step * 1))
-        path.addLine(to: CGPoint(x: step * 1, y: step * 1))
+        path.addLine(to: CGPoint(x: step * 2 + k, y: step * 0))
+        path.addLine(to: CGPoint(x: step * 2 + k, y: step * 1 - k ))
+        path.addLine(to: CGPoint(x: step * 3, y: step * 1 - k))
+        path.addLine(to: CGPoint(x: step * 3, y: step * 2 + k))
+        path.addLine(to: CGPoint(x: step * 2 + k, y: step * 2 + k ))
+        path.addLine(to: CGPoint(x: step * 2 + k , y: step * 3))
+        path.addLine(to: CGPoint(x: step * 1 - k, y: step * 3))
+        path.addLine(to: CGPoint(x: step * 1 - k, y: step * 2 + k))
+        path.addLine(to: CGPoint(x: step * 0, y: step * 2 + k))
+        path.addLine(to: CGPoint(x: step * 0, y: step * 1 - k))
+        path.addLine(to: CGPoint(x: step * 1 - k, y: step * 1 - k))
 
         path.close()
 

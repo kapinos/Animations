@@ -42,13 +42,13 @@ extension RhombusesView: GeometryShapesProtocol {
 
                 // TODO: - count normally - adding exta column at the left side ◆
                 // FIXME: - 2 ➢ stub
-                if i == 0 {
-                    let point = CGPoint(x: line[i].frame.midX - viewSize.width - 2, y: line[i].frame.midY)
-                    let rhombus = UIView(frame: CGRect(origin: point, size: viewSize))
-                    rhombus.addRhombusPathInViewsLayer(with: color)
-                    self.addSubview(rhombus)
-                    rLine.append(rhombus)
-                }
+//                if i == 0 {
+//                    let point = CGPoint(x: line[i].frame.midX - viewSize.width - 2, y: line[i].frame.midY)
+//                    let rhombus = UIView(frame: CGRect(origin: point, size: viewSize))
+//                    rhombus.addRhombusPathInViewsLayer(with: color)
+//                    self.addSubview(rhombus)
+//                    rLine.append(rhombus)
+//                }
                 ///
 
                 let point = CGPoint(x: line[i].frame.midX, y: line[i].frame.midY)

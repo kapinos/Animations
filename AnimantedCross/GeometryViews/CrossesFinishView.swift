@@ -56,7 +56,7 @@ extension CrossesFinishView: GeometryShapesProtocol {
                     UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.25)
                     { cross.transform = CGAffineTransform(rotationAngle: self.angle.degreesToRadians()) }
 
-                    // TODO: - move mot to lines - in diagonales
+                    // TODO: - move not to lines - in diagonales
                     UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.5)
                     { cross.center = CGPoint(x: CGFloat(i)*self.size, y: lastCross.frame.minY) }
                 }
