@@ -32,14 +32,14 @@ class ViewController: UIViewController {
 
     private let size: CGFloat = 30
     private let rotationCrossAngle: CGFloat = 90
-    private let rotationCubesAngle: CGFloat = 135
+    private let rotationCubesAngle: CGFloat = 45
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         restoreView()
         
-        firstViewWithCrosses = CrossesStartView(frame: self.view.bounds, size: size,
+        firstViewWithCrosses = CrossesStartView(frame: self.view.bounds, shapeSize: size,
                                                  color: UIColor.GeometryColors.firstColor, angle: -rotationCrossAngle)
         self.view.addSubview(firstViewWithCrosses)
         
@@ -64,7 +64,7 @@ private extension ViewController {
     }
 
     func invertCrossesToCubes(to color: UIColor) {
-        self.secondViewWithCubes = CubesView(frame: view.bounds, size: size,
+        self.secondViewWithCubes = CubesView(frame: view.bounds, shapeSize: size,
                                              color: color,
                                              views: firstViewWithCrosses.getSubviews(),
                                              angle: -rotationCubesAngle)
@@ -73,7 +73,7 @@ private extension ViewController {
     }
     
     func invertCubesToRhombuses(to color: UIColor) {
-        self.thirdViewWithRhombuses = RhombusesView(frame: view.bounds, size: size,
+        self.thirdViewWithRhombuses = RhombusesView(frame: view.bounds, shapeSize: size,
                                                     color: color,
                                                     views: secondViewWithCubes.getSubviews(),
                                                     angle: rotationCubesAngle)
@@ -82,23 +82,11 @@ private extension ViewController {
     }
     
     func invertRhombusesToCrosses(to color: UIColor) {
-        self.fourthViewWithRhombuses = CrossesFinishView(frame: view.bounds, size: size,
+        self.fourthViewWithRhombuses = CrossesFinishView(frame: view.bounds, shapeSize: size,
                                                          color: color,
                                                          views: thirdViewWithRhombuses.getSubviews(),
                                                          angle: rotationCrossAngle)
         self.view.addSubview(fourthViewWithRhombuses)
         self.thirdViewWithRhombuses.removeFromSuperview()
-    }
-}
-
-// MARK: - Helpers
-extension ViewController {
-    func printStartTime(_ functionName: String) {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "mm:ss"
-        
-        let dateString = formatter.string(from: Date())
-        print(">>> func: \(functionName): ", dateString)
     }
 }

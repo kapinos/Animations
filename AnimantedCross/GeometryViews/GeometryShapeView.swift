@@ -16,7 +16,7 @@ protocol GeometryShapesProtocol: class {
 class GeometryShapeView: UIView {
 
     var shapesSubviews = [[UIView]]()
-    var size: CGFloat = 0
+    var shapeSize: CGFloat = 0
     var angle: CGFloat = 0
     var color = UIColor.black
     
@@ -28,20 +28,20 @@ class GeometryShapeView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init(frame: CGRect, size: CGFloat, color: UIColor, angle: CGFloat) {
+    init(frame: CGRect, shapeSize: CGFloat, color: UIColor, angle: CGFloat) {
         super.init(frame: frame)
         
         self.backgroundColor = UIColor.GeometryColors.opposite(color: color)
-        self.size = size
+        self.shapeSize = shapeSize
         self.color = color
         self.angle = angle
     }
     
-    init(frame: CGRect, size: CGFloat, color: UIColor, views: [[UIView]]?, angle: CGFloat) {
+    init(frame: CGRect, shapeSize: CGFloat, color: UIColor, views: [[UIView]]?, angle: CGFloat) {
         super.init(frame: frame)
         
         self.backgroundColor = UIColor.GeometryColors.opposite(color: color)
-        self.size = size
+        self.shapeSize = shapeSize
         self.color = color
         self.angle = angle
     }
