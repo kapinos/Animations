@@ -31,19 +31,31 @@ extension CrossesFinishView: GeometryShapesProtocol {
     func createSubviews(from views: [[UIView]]?, with color: UIColor) {
         guard let views = views else { return }
         //let sizeMultiplier = (self.shapeSize / sqrt(2)) / (self.shapeSize * 2 / 3)
-
-        // TODO: - add aditional rows and cols for crosses
         for line in views {
+            // TODO: - add aditional rows
             var crossLine = [UIView]()
+        
             for i in 0..<line.count {
                 let point = CGPoint(x: line[i].frame.midX - self.shapeSize,
-                                    y: line[i].frame.midY - self.shapeSize * CGFloat(max(1, 1)))
+                                    y: line[i].frame.midY - self.shapeSize)
                 
                 let cross = UIView(frame: CGRect(origin: point,
                                                  size: CGSize(width: self.shapeSize, height: self.shapeSize)))
                 cross.addCrossPathInViewsLayer(with: color)
                 self.addSubview(cross)
                 crossLine.append(cross)
+                
+                // FIXME: - additional cols
+                if i == line.count-1 {
+                    for col in 1..<4 {
+                        let addPoint = CGPoint(x: point.x + CGFloat(col)*self.shapeSize, y: point.y)
+                        let cross = UIView(frame: CGRect(origin: addPoint,
+                                                         size: CGSize(width: self.shapeSize, height: self.shapeSize)))
+                        cross.addCrossPathInViewsLayer(with: color)
+                        self.addSubview(cross)
+                        crossLine.append(cross)
+                    }
+                }
             }
             shapesSubviews.append(crossLine)
         }
