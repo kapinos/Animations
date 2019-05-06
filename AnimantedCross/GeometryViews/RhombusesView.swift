@@ -2,8 +2,8 @@
 //  RhombusesView.swift
 //  AnimantedCross
 //
-//  Created by Developer on 4/23/19.
-//  Copyright © 2019 Developer. All rights reserved.
+//  Created by Anastasia on 4/23/19.
+//  Copyright © 2019 Anastasia. All rights reserved.
 //
 
 import UIKit

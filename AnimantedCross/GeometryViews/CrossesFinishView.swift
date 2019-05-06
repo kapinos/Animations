@@ -2,8 +2,8 @@
 //  CrossesFinishView.swift
 //  AnimantedCross
 //
-//  Created by Developer on 4/23/19.
-//  Copyright © 2019 Developer. All rights reserved.
+//  Created by Anastasia on 4/23/19.
+//  Copyright © 2019 Anastasia. All rights reserved.
 //
 
 import UIKit
@@ -30,28 +30,22 @@ class CrossesFinishView: GeometryShapeView {
 extension CrossesFinishView: GeometryShapesProtocol {
     func createSubviews(from views: [[UIView]]?, with color: UIColor) {
         guard let views = views else { return }
-        //let sizeMultiplier = (self.shapeSize / sqrt(2)) / (self.shapeSize * 2 / 3)
+        let additionalAmount = 4
+    
         for line in views {
-            // TODO: - add aditional rows
             var crossLine = [UIView]()
-        
             for i in 0..<line.count {
                 let point = CGPoint(x: line[i].frame.midX - self.shapeSize,
-                                    y: line[i].frame.midY - self.shapeSize)
-                
-                let cross = UIView(frame: CGRect(origin: point,
-                                                 size: CGSize(width: self.shapeSize, height: self.shapeSize)))
-                cross.addCrossPathInViewsLayer(with: color)
+                                    y: line[i].frame.midY - self.shapeSize * CGFloat(additionalAmount))
+                let cross = self.createAndAddCross(at: point)
                 self.addSubview(cross)
                 crossLine.append(cross)
                 
-                // FIXME: - additional cols
+                // additional cols
                 if i == line.count-1 {
-                    for col in 1..<4 {
-                        let addPoint = CGPoint(x: point.x + CGFloat(col)*self.shapeSize, y: point.y)
-                        let cross = UIView(frame: CGRect(origin: addPoint,
-                                                         size: CGSize(width: self.shapeSize, height: self.shapeSize)))
-                        cross.addCrossPathInViewsLayer(with: color)
+                    for col in 1..<additionalAmount {
+                        let cross = self.createAndAddCross(at: CGPoint(x: point.x + CGFloat(col)*self.shapeSize,
+                                                                       y: point.y))
                         self.addSubview(cross)
                         crossLine.append(cross)
                     }
@@ -80,5 +74,15 @@ extension CrossesFinishView: GeometryShapesProtocol {
                 }
             }
         }) { (_) in completion() }
+    }
+}
+
+// MARK: - private
+private extension CrossesFinishView {
+    func createAndAddCross(at point: CGPoint) -> UIView {
+        let cross = UIView(frame: CGRect(origin: point,
+                                         size: CGSize(width: self.shapeSize, height: self.shapeSize)))
+        cross.addCrossPathInViewsLayer(with: color)
+        return cross
     }
 }

@@ -22,17 +22,13 @@ class CrossesStartView: GeometryShapeView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override init(frame: CGRect, shapeSize: CGFloat, color: UIColor, angle: CGFloat) {
-//        let additional = shapeSize * CGFloat(10)
-//        let scaledFrame = CGRect(origin: CGPoint(x: -additional, y: -additional),
-//                                 size: CGSize(width: frame.width + additional * 2, height: frame.height + add))
-        
-        super.init(frame: frame, shapeSize: shapeSize, color: color, angle: angle)
+    override init(frame: CGRect, shapeSize: CGFloat, color: UIColor, views: [[UIView]]?, angle: CGFloat) {
+        super.init(frame: frame, shapeSize: shapeSize, color: color, views: views, angle: angle)
         
         cols = Int(self.bounds.width/shapeSize)
         rows = Int(self.bounds.height/shapeSize)
         
-        createSubviews(from: nil, with: color)
+        createSubviews(from: views, with: color)
     }
 }
 
@@ -41,20 +37,40 @@ class CrossesStartView: GeometryShapeView {
 extension CrossesStartView: GeometryShapesProtocol {
     func createSubviews(from views: [[UIView]]?, with color: UIColor) {
         let step = self.shapeSize / 3
-        
         let shift = countAdditional()
         
-        for row in -shift.rows...rows {
-            var diagonal = [UIView]()
-            for col in 0...cols + shift.cols {
-                let point = CGPoint(x: CGFloat(col)*shapeSize - CGFloat(row)*step,
-                                    y: CGFloat(col)*step + CGFloat(row)*shapeSize)
-                let cross = UIView(frame: CGRect(origin: point, size: CGSize(width: shapeSize, height: shapeSize)))
-                cross.addCrossPathInViewsLayer(with: color)
-                self.addSubview(cross)
-                diagonal.append(cross)
+       // var cont = true
+        if let views = views {
+            for row in views {
+                var diagonal = [UIView]()
+                for i in 0..<row.count {
+                    // if (row[i].frame.maxX - step*2) > self.frame.width {
+                    //  cont = false
+                    //  break
+                    //}
+                    let point = CGPoint(x: row[i].frame.maxX - step*2, y: row[i].frame.maxY - step)
+                    let cross = UIView(frame: CGRect(origin: point, size: CGSize(width: shapeSize, height: shapeSize)))
+                    cross.addCrossPathInViewsLayer(with: color)
+                    self.addSubview(cross)
+                    diagonal.append(cross)
+                }
+                // if !cont {  break }
+                shapesSubviews.append(diagonal)
             }
-            shapesSubviews.append(diagonal)
+            
+        } else {
+            for row in -shift.rows...rows {
+                var diagonal = [UIView]()
+                for col in 0...cols + shift.cols {
+                    let point = CGPoint(x: CGFloat(col)*shapeSize - CGFloat(row)*step,
+                                        y: CGFloat(col)*step + CGFloat(row)*shapeSize)
+                    let cross = UIView(frame: CGRect(origin: point, size: CGSize(width: shapeSize, height: shapeSize)))
+                    cross.addCrossPathInViewsLayer(with: color)
+                    self.addSubview(cross)
+                    diagonal.append(cross)
+                }
+                shapesSubviews.append(diagonal)
+            }
         }
     }
     
@@ -63,6 +79,10 @@ extension CrossesStartView: GeometryShapesProtocol {
             for diagonal in self.shapesSubviews {
                 
                 guard let lastCross = diagonal.last else { return }
+                // TODO: - need to animate for last visible cross, not for the last in the row
+                // print(">>>lastCross.frame.minX: ", lastCross.frame.minX)
+                // print(">>>parentView.width: ", self.frame.size.width)
+                
                 for i in 0..<diagonal.count {
                     let cross = diagonal[i]
                     
