@@ -68,8 +68,8 @@ extension CrossesFinishView: GeometryShapesProtocol {
                     })
                     
                     UIView.addKeyframe(withRelativeStartTime: 0.25, relativeDuration: 0.5, animations: {
-                        cross.center = CGPoint(x: cross.frame.minX - CGFloat(row) * step,
-                                               y: cross.frame.minY + CGFloat(col) * step)
+                        cross.center = CGPoint(x: cross.frame.midX - CGFloat(row) * step - self.shapeSize - step/30,
+                                               y: cross.frame.midY + CGFloat(col) * step - self.shapeSize - step)
                     })
                 }
             }
